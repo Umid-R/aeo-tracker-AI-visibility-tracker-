@@ -29,3 +29,22 @@ CREATE TABLE IF NOT EXISTS mentions (
 );
 CREATE INDEX IF NOT EXISTS mentions_brand_idx ON mentions (brand);
 CREATE INDEX IF NOT EXISTS mentions_answer_idx ON mentions (answer_id);
+
+-- Hand-checked "true" brands per answer (ground truth for accuracy).
+CREATE TABLE IF NOT EXISTS labels (
+  id         BIGSERIAL PRIMARY KEY,
+  answer_id  BIGINT NOT NULL REFERENCES raw_answers(id) ON DELETE CASCADE,
+  brand      TEXT NOT NULL,
+  position   INT,
+  sentiment  TEXT CHECK (sentiment IN ('positive', 'neutral', 'negative')),
+  labeled_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (answer_id, brand)
+);
+CREATE INDEX IF NOT EXISTS labels_answer_idx ON labels (answer_id);
+
+-- Which answers have been labeled (also covers answers with zero brands).
+CREATE TABLE IF NOT EXISTS labeled_answers (
+  answer_id  BIGINT PRIMARY KEY REFERENCES raw_answers(id) ON DELETE CASCADE,
+  labeled_at TIMESTAMPTZ DEFAULT now(),
+  note       TEXT
+);
