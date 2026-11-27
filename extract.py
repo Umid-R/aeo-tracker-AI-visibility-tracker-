@@ -25,6 +25,14 @@ from dotenv import load_dotenv
 
 EXTRACTOR = "v1_string"
 
+# First words of bold section labels that are never brand names
+LABEL_WORDS = {
+    "for", "why", "how", "best", "must", "must-visit", "price", "quality",
+    "takeout", "small", "medium", "large", "order", "look", "drawbacks", "note",
+    "tip", "pro", "bonus", "atmosphere", "vibe", "summary", "location", "locations",
+    "convenience", "study", "important", "overall", "budget", "iced", "hot",
+}
+
 
 # ---------- text cleanup ----------
 
@@ -80,8 +88,14 @@ def unknown_bold_terms(text: str, patterns):
     """Bold **terms** that match no known alias -> candidates for brands.yaml."""
     out = []
     for raw in re.findall(r"\*\*(.+?)\*\*", text):
-        term = raw.strip().rstrip(":").strip()
-        if not term or len(term.split()) > 4 or any(ch.isdigit() for ch in term) or ":" in term:
+        raw = raw.strip()
+        term = re.sub(r"\s*\(.*?\)\s*", " ", raw).strip()   # drop "(스터디카페)" etc.
+        if (not term
+                or raw.endswith(":") or ":" in term          # labels like "Why it's great:"
+                or len(term.split()) > 3                     # brand names are short
+                or any(ch.isdigit() for ch in term)
+                or not (term[0].isupper() or not term[0].isascii())  # "never", "\"Ah-Ah\""
+                or term.split()[0].lower() in LABEL_WORDS):
             continue
         if extract_v1(term, patterns):
             continue
