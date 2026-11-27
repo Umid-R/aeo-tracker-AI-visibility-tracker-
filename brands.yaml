@@ -29,3 +29,12 @@ Camel Coffee:     [Camel Coffee, 카멜커피]
 Cafe Droptop:     [Cafe Droptop, Droptop, 드롭탑]
 Coffee Bay:       [Coffee Bay, 커피베이]
 Dunkin:           [Dunkin' Donuts, Dunkin Donuts, Dunkin', Dunkin, 던킨]
+
+# Dessert cafes: included in the category (rule decided 2026-11-27)
+Billy Angel:      [Billy Angel Cake Company, Billy Angel, 빌리엔젤]
+Cafe Knotted:     [Cafe Knotted, Knotted, 노티드]
+Cafe Layered:     [Cafe Layered, 카페 레이어드, 카페레이어드]   # not bare "Layered": common word in cake answers
+Sulbing:          [Sulbing, 설빙]
+
+# Found by labeling (missed by v1)
+Banapresso:       [Banapresso, 바나프레소]
