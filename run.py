@@ -29,14 +29,30 @@ EXISTS_SQL = """
 """
 
 
+def is_daily_quota_error(err: Exception) -> bool:
+    """True when the daily quota is used up: retrying today is pointless.
+
+    Per-minute limits (also 429) are NOT daily: those are worth retrying after a wait.
+    Gemini puts the quota id in the message, e.g. '...RequestsPerDay...'.
+    """
+    msg = str(err)
+    return "RESOURCE_EXHAUSTED" in msg and "PerDay" in msg
+
+
 def call_with_retry(fn, model_name, question):
-    """Retry on errors (e.g. 429 rate limit) with growing waits: 5s, 10s, 20s."""
+    """Retry temporary errors (503 overload, per-minute 429) with waits: 5s, 10s.
+
+    Returns (result, error_text, quota_exhausted).
+    """
     for attempt in range(MAX_RETRIES):
         try:
-            return fn(model_name, question), None
+            return fn(model_name, question), None, False
         except Exception as e:  # noqa: BLE001 - we want to log any API failure
+            error = f"{type(e).__name__}: {e}"
+            if is_daily_quota_error(e):
+                return None, error, True
             if attempt == MAX_RETRIES - 1:
-                return None, f"{type(e).__name__}: {e}"
+                return None, error, False
             time.sleep(5 * 2 ** attempt)
 
 
@@ -58,7 +74,7 @@ def main():
                     skipped += 1
                     continue
 
-                result, error = call_with_retry(ask, model["name"], q["text"])
+                result, error, quota_exhausted = call_with_retry(ask, model["name"], q["text"])
                 if result:
                     text, tin, tout = result
                     cost = ((tin or 0) * model["price_in"] + (tout or 0) * model["price_out"]) / 1_000_000
@@ -74,6 +90,11 @@ def main():
                 conn.execute(INSERT_SQL, (run_id, today, model["name"], q["id"], q["text"],
                                           text, tin, tout, cost, error))
 
+                if quota_exhausted:
+                    failed += 1
+                    print(f"[STOP] {model['name']}: daily quota used up at {q['id']}. "
+                          f"Skipping its remaining questions; re-run after the quota resets.")
+                    break  # quotas are per model, so move on to the next model
                 if error:
                     failed += 1
                     print(f"[FAIL] {model['name']} {q['id']}: {error}")
