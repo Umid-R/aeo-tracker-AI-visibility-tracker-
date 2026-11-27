@@ -1,0 +1,55 @@
+# What to track and which AIs to ask.
+# Add a model = add an entry here (+ a function in providers.py if it's a new provider).
+
+category: coffee_chains_korea
+
+models:
+  - provider: gemini
+    name: gemini-3.8-flash   # check AI Studio for the current free-tier Flash model name
+    price_in: 0              # $ per 1M input tokens (free tier = 0)
+    price_out: 0             # $ per 1M output tokens
+
+# Seconds to wait between API calls (free tier has low rate limits)
+sleep_between_calls: 4
+
+questions:
+  - id: q01
+    text: "What is the best coffee chain in Seoul?"
+  - id: q02
+    text: "Which cafe chain in Korea is the cheapest?"
+  - id: q03
+    text: "What's a good cafe chain in Korea for studying for long hours?"
+  - id: q04
+    text: "Which coffee chains in Korea are open 24 hours?"
+  - id: q05
+    text: "Best cafe chain in Korea for desserts and cakes?"
+  - id: q06
+    text: "Which Korean coffee brand has the best iced americano?"
+  - id: q07
+    text: "Recommend a coffee chain in Korea for university students on a budget."
+  - id: q08
+    text: "What are the most popular coffee franchises in South Korea?"
+  - id: q09
+    text: "Which cafe chain in Korea has the best loyalty app or rewards program?"
+  - id: q10
+    text: "Where should a tourist get coffee in Seoul?"
+  - id: q11
+    text: "Which coffee chain in Korea has the best quality beans?"
+  - id: q12
+    text: "Best cafe chain in Korea for working remotely with good Wi-Fi?"
+  - id: q13
+    text: "Which Korean coffee chain is best for large-size drinks?"
+  - id: q14
+    text: "Compare Starbucks and Korean local coffee chains."
+  - id: q15
+    text: "What is the best coffee chain to open a franchise with in Korea?"
+  - id: q16
+    text: "서울에서 제일 좋은 카페 프랜차이즈는 어디야?"
+  - id: q17
+    text: "한국에서 가장 저렴한 커피 브랜드 추천해줘"
+  - id: q18
+    text: "공부하기 좋은 카페 프랜차이즈 알려줘"
+  - id: q19
+    text: "가성비 좋은 커피 체인점은 어디야?"
+  - id: q20
+    text: "디저트가 맛있는 카페 프랜차이즈 추천해줘"

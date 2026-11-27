@@ -1,0 +1,4 @@
+google-genai
+psycopg[binary]
+pyyaml
+python-dotenv
