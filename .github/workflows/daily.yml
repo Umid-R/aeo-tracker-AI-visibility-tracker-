@@ -1,0 +1,34 @@
+name: Daily AEO run
+
+on:
+  schedule:
+    # 09:17 UTC = 18:17 Korea time, after the Gemini free-tier quota resets.
+    # (Off the hour on purpose: GitHub delays jobs scheduled at :00 the most.)
+    - cron: "17 9 * * *"
+  workflow_dispatch: {}   # adds a "Run workflow" button for manual runs
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      TZ: Asia/Seoul          # so run_date is the Korean date
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Collect answers
+        run: python run.py
+
+      - name: Extract brands (v1)
+        if: always()          # still extract whatever was collected, even if run.py failed
+        run: python extract.py
