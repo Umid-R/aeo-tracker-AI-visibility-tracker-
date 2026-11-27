@@ -1,0 +1,31 @@
+# Canonical brand name -> every spelling seen in answers.
+# Built from real Gemini answers. When extract.py prints "possible new brands",
+# add the real ones here and re-run it.
+#
+# Rules:
+# - Latin aliases match whole words only (case-insensitive): "Fritz" won't match "Fritzy".
+# - Korean aliases match as substrings, because particles attach: 스타벅스는, 스타벅스에서.
+# - Avoid aliases that are normal words (e.g. "Mega" alone, "Camel" alone).
+
+Starbucks:        [Starbucks, 스타벅스]
+A Twosome Place:  [A Twosome Place, Twosome Place, Twosome, 투썸플레이스, 투썸]
+Mega Coffee:      [Mega Coffee, Mega MGC Coffee, MGC Coffee, 메가커피, 메가MGC커피, 메가엠지씨커피]
+Compose Coffee:   [Compose Coffee, 컴포즈커피, 컴포즈]
+Paik's Coffee:    [Paik's Coffee, Paiks Coffee, Paik's Dabang, Paik's, 빽다방]
+Ediya:            [Ediya Coffee, Ediya, EDIYA, 이디야커피, 이디야]
+Mammoth Coffee:   [Mammoth Coffee, Mammoth Express, 매머드커피, 매머드 익스프레스]   # not bare "Mammoth": normal English word
+The Venti:        [The Venti, 더벤티]
+Hollys:           [Hollys Coffee, Hollys, 할리스커피, 할리스]
+Tom N Toms:       [Tom N Toms, Tom n Toms, Tom & Toms, TOM N TOMS, 탐앤탐스]
+Pascucci:         [Caffe Pascucci, Caffè Pascucci, Pascucci, 파스쿠찌]
+Angel-in-us:      [Angel-in-us, Angelinus, Angel in us, 엔제리너스]
+Paul Bassett:     [Paul Bassett, 폴바셋]
+Coffee Bean:      [The Coffee Bean & Tea Leaf, Coffee Bean & Tea Leaf, Coffee Bean, 커피빈]
+Blue Bottle:      [Blue Bottle Coffee, Blue Bottle, 블루보틀]
+Fritz Coffee:     [Fritz Coffee Company, Fritz Coffee, Fritz, 프릳츠]
+Terarosa:         [Terarosa, Terrarosa, 테라로사]
+Anthracite:       [Anthracite Coffee Roasters, Anthracite Coffee, Anthracite, 앤트러사이트]
+Camel Coffee:     [Camel Coffee, 카멜커피]
+Cafe Droptop:     [Cafe Droptop, Droptop, 드롭탑]
+Coffee Bay:       [Coffee Bay, 커피베이]
+Dunkin:           [Dunkin' Donuts, Dunkin Donuts, Dunkin', Dunkin, 던킨]

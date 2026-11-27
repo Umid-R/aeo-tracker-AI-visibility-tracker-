@@ -14,3 +14,18 @@ CREATE TABLE IF NOT EXISTS raw_answers (
   created_at    TIMESTAMPTZ DEFAULT now(),
   UNIQUE (run_date, model, question_id)
 );
+
+-- Brands extracted from each answer. One row per (answer, brand, extractor).
+CREATE TABLE IF NOT EXISTS mentions (
+  id            BIGSERIAL PRIMARY KEY,
+  answer_id     BIGINT NOT NULL REFERENCES raw_answers(id) ON DELETE CASCADE,
+  brand         TEXT NOT NULL,
+  position      INT,            -- 1 = mentioned first
+  sentiment     TEXT,           -- positive / neutral / negative (filled by v2)
+  extractor     TEXT NOT NULL,  -- 'v1_string', 'v2_llm', ...
+  matched_alias TEXT,           -- which spelling matched (v1), for debugging
+  created_at    TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (answer_id, brand, extractor)
+);
+CREATE INDEX IF NOT EXISTS mentions_brand_idx ON mentions (brand);
+CREATE INDEX IF NOT EXISTS mentions_answer_idx ON mentions (answer_id);
