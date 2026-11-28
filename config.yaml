@@ -53,3 +53,10 @@ questions:
     text: "가성비 좋은 커피 체인점은 어디야?"
   - id: q20
     text: "디저트가 맛있는 카페 프랜차이즈 추천해줘"
+
+# Brand extraction v2 (extract_llm.py). Use a DIFFERENT model than collection,
+# so the two don't share one free-tier daily quota.
+extraction:
+  model: gemini-3.7-flash      # any free-tier model that works for you (check AI Studio)
+  batch_size: 5                # answers per request -> 20 answers = 4 requests
+  sleep_between_calls: 5

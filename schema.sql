@@ -48,3 +48,13 @@ CREATE TABLE IF NOT EXISTS labeled_answers (
   labeled_at TIMESTAMPTZ DEFAULT now(),
   note       TEXT
 );
+
+-- Which answers each extractor has already processed (incl. answers with zero brands),
+-- so quota-limited extractors (v2_llm) never redo work.
+CREATE TABLE IF NOT EXISTS extracted_answers (
+  answer_id    BIGINT NOT NULL REFERENCES raw_answers(id) ON DELETE CASCADE,
+  extractor    TEXT NOT NULL,
+  model        TEXT,
+  extracted_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (answer_id, extractor)
+);

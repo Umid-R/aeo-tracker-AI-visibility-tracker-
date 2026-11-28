@@ -27,16 +27,25 @@ def main():
         if not labeled:
             print("No labeled answers yet - run `python label.py` first.")
             return
+        if args.extractor != "v1_string":   # only score answers this extractor processed
+            done = {r[0] for r in conn.execute(
+                "SELECT answer_id FROM extracted_answers WHERE extractor = %s", (args.extractor,))}
+            labeled = [a for a in labeled if a in done]
+            if not labeled:
+                print(f"No labeled answers processed by {args.extractor} yet.")
+                return
         truth = conn.execute(
-            "SELECT answer_id, brand, position FROM labels WHERE answer_id = ANY(%s)", (labeled,)
+            "SELECT answer_id, brand, position, sentiment FROM labels WHERE answer_id = ANY(%s)", (labeled,)
         ).fetchall()
         pred = conn.execute(
-            "SELECT answer_id, brand, position FROM mentions "
+            "SELECT answer_id, brand, position, sentiment FROM mentions "
             "WHERE extractor = %s AND answer_id = ANY(%s)", (args.extractor, labeled)
         ).fetchall()
 
-    t = {(a, b): p for a, b, p in truth}
-    p = {(a, b): pos for a, b, pos in pred}
+    t = {(a, b): p for a, b, p, _ in truth}
+    p = {(a, b): pos for a, b, pos, _ in pred}
+    t_sent = {(a, b): s for a, b, _, s in truth if s}
+    p_sent = {(a, b): s for a, b, _, s in pred}
     correct = t.keys() & p.keys()
     missed = Counter(b for (_, b) in t.keys() - p.keys())
     wrong = Counter(b for (_, b) in p.keys() - t.keys())
@@ -50,6 +59,10 @@ def main():
     print(f"  recall     {recall:.1%}")
     if correct:
         print(f"  position   {same_pos / len(correct):.1%} of correct brands at the right position")
+    scored = [k for k in correct if k in t_sent and p_sent.get(k)]
+    if scored:
+        agree = sum(1 for k in scored if t_sent[k] == p_sent[k])
+        print(f"  sentiment  {agree / len(scored):.1%} agree with your labels ({len(scored)} brands with labeled sentiment)")
     if missed:
         print("\nMissed (in labels, not found) - add aliases?")
         for b, n in missed.most_common():
