@@ -9,6 +9,8 @@ Read the ANSWER first, then fix the guess with short commands:
   +Ediya@2       add a brand at position 2
   m 4 2          move item 4 to position 2
   s 1 p          sentiment of item 1: p=positive, n=neutral, x=negative
+  s ppnpx        sentiment of ALL items at once, one letter per item in order
+  s all p        same sentiment for every item
   skip           skip this answer for now
   q              quit (everything saved so far stays saved)
 
@@ -73,10 +75,23 @@ def edit_loop(items, brands, patterns):
                 _, a, b = cmd.split()
                 items.insert(int(b) - 1, items.pop(int(a) - 1))
             elif cmd.startswith("s "):
-                _, n, s = cmd.split()
-                items[int(n) - 1]["sentiment"] = SENTIMENT[s]
+                parts = cmd.split()
+                if len(parts) == 3 and parts[1] == "all":          # s all p
+                    for it in items:
+                        it["sentiment"] = SENTIMENT[parts[2]]
+                elif len(parts) == 3:                              # s 2 p
+                    items[int(parts[1]) - 1]["sentiment"] = SENTIMENT[parts[2]]
+                elif len(parts) == 2 and set(parts[1]) <= set(SENTIMENT):  # s ppnpx
+                    letters = parts[1]
+                    if len(letters) != len(items):
+                        print(f"  ? {len(letters)} letters for {len(items)} brands - give one letter per brand")
+                        continue
+                    for it, ch in zip(items, letters):
+                        it["sentiment"] = SENTIMENT[ch]
+                else:
+                    raise ValueError
             else:
-                print("  ? commands: Enter, -N, +Brand, +Brand@N, m A B, s N p/n/x, skip, q")
+                print("  ? commands: Enter, -N, +Brand, +Brand@N, m A B, s N p/n/x, s ppnx, s all p, skip, q")
                 continue
         except (ValueError, IndexError, KeyError):
             print("  ? couldn't apply that - check the item number / command")
