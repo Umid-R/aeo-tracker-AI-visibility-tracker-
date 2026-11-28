@@ -5,7 +5,7 @@ category: coffee_chains_korea
 
 models:
   - provider: gemini
-    name: gemini-3.8-flash   # check AI Studio for the current free-tier Flash model name
+    name: gemini-3.6-flash   # check AI Studio for the current free-tier Flash model name
     price_in: 0              # $ per 1M input tokens (free tier = 0)
     price_out: 0             # $ per 1M output tokens
 
@@ -57,6 +57,6 @@ questions:
 # Brand extraction v2 (extract_llm.py). Use a DIFFERENT model than collection,
 # so the two don't share one free-tier daily quota.
 extraction:
-  model: gemini-3.7-flash      # any free-tier model that works for you (check AI Studio)
+  model: gemini-3.6-flash      # any free-tier model that works for you (check AI Studio)
   batch_size: 5                # answers per request -> 20 answers = 4 requests
   sleep_between_calls: 5
