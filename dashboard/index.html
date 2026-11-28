@@ -110,6 +110,12 @@ const BRAND_COLORS = {
   "Angel-in-us": "#b0477d", "The Venti": "#2f9d8f", "Banapresso": "#e1629a",
 };
 const MODEL_COLORS = { gemini: "#3a6fe0", gpt: "#10a37f", claude: "#d97757", deepseek: "#4d6bfe" };
+// Cafe logos (round badges in dashboard/logos/brands). Brands without one get colored initials.
+const BRAND_LOGOS = new Set(["A Twosome Place", "Starbucks", "Mega Coffee", "Compose Coffee", "Paik's Coffee",
+  "Hollys", "Paul Bassett", "Ediya", "Tom N Toms", "Pascucci"]);
+const slug = (n) => n.toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function brandLogo(b) { return BRAND_LOGOS.has(b) ? `logos/brands/${slug(b)}.png` : null; }
+
 // AI models shown in the filter; a chip becomes active once that model has data.
 const MODEL_LINEUP = [
   { key: "gemini", name: "Gemini", logo: "logos/gemini.png" },
@@ -246,7 +252,10 @@ function drawChart(series, periodStart, periodEnd) {
                  fill: "none", stroke: s.color, "stroke-width": 2, "stroke-dasharray": "2 5",
                  "stroke-linecap": "round" }, svg);
     el("circle", { cx: lx, cy: by, r: 30, fill: "#fff", stroke: "#efeadf", "stroke-width": 2 }, svg);
-    if (s.logo) {
+    if (s.logo && s.roundLogo) {          // cafe logos: already round, fill the badge
+      el("image", { href: s.logo, x: lx - 26, y: by - 26, width: 52, height: 52,
+                    preserveAspectRatio: "xMidYMid meet" }, svg);
+    } else if (s.logo) {                  // AI model logos: transparent, sit inside the white badge
       el("image", { href: s.logo, x: lx - 19, y: by - 19, width: 38, height: 38,
                     preserveAspectRatio: "xMidYMid meet" }, svg);
     } else {
@@ -272,7 +281,8 @@ function drawChart(series, periodStart, periodEnd) {
 function renderModelView() {
   const m = state.data.models[state.model];
   const all = m.brands.map((b) => ({ name: b.brand, start: b.start, end: b.end, change: b.change,
-                                     color: brandColor(b.brand), badge: initials(b.brand) }));
+                                     color: brandColor(b.brand), badge: initials(b.brand),
+                                     logo: brandLogo(b.brand), roundLogo: true }));
   const series = state.top === "All" ? all : all.slice(0, state.top);
   $("headline").textContent = `Coffee chains in ${m.label} answers`;
   $("subtitle").textContent =
