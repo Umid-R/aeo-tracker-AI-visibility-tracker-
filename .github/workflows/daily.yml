@@ -4,7 +4,7 @@ on:
   schedule:
     # 09:17 UTC = 18:17 Korea time, after the Gemini free-tier quota resets.
     # (Off the hour on purpose: GitHub delays jobs scheduled at :00 the most.)
-    - cron: "17 9 * * *"
+    - cron: "17 23 * * *"
   workflow_dispatch: {}   # adds a "Run workflow" button for manual runs
 
 jobs:
