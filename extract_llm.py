@@ -128,7 +128,7 @@ def main():
     patterns = compile_patterns(brands)
     model, batch_size, pause = cfg["model"], cfg.get("batch_size", 5), cfg.get("sleep_between_calls", 5)
 
-    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+    with psycopg.connect(os.environ["DATABASE_URL"], autocommit=True) as conn:  # commit each save immediately
         todo = conn.execute(
             """SELECT r.id, r.answer_text FROM raw_answers r
                LEFT JOIN extracted_answers e ON e.answer_id = r.id AND e.extractor = %s

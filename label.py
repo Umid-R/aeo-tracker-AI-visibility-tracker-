@@ -109,7 +109,7 @@ def main():
         brands = yaml.safe_load(f)
     patterns = compile_patterns(brands)
 
-    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+    with psycopg.connect(os.environ["DATABASE_URL"], autocommit=True) as conn:  # commit each save immediately
         answers = conn.execute(
             """SELECT r.id, r.run_date, r.model, r.question, r.answer_text
                FROM raw_answers r
