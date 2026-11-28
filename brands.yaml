@@ -22,7 +22,7 @@ Angel-in-us:      [Angel-in-us, Angelinus, Angel in us, 엔제리너스]
 Paul Bassett:     [Paul Bassett, 폴바셋]
 Coffee Bean:      [The Coffee Bean & Tea Leaf, Coffee Bean & Tea Leaf, Coffee Bean, 커피빈]
 Blue Bottle:      [Blue Bottle Coffee, Blue Bottle, 블루보틀]
-Fritz Coffee:     [Fritz Coffee Company, Fritz Coffee, Fritz, 프릳츠]
+Fritz Coffee:     [Fritz Coffee Company, Fritz Coffee, Fritz, 프릳츠, 프릿츠]
 Terarosa:         [Terarosa, Terrarosa, 테라로사]
 Anthracite:       [Anthracite Coffee Roasters, Anthracite Coffee, Anthracite, 앤트러사이트]
 Camel Coffee:     [Camel Coffee, 카멜커피]
@@ -42,3 +42,11 @@ Banapresso:       [Banapresso, 바나프레소]
 # Unmanned (self-service) cafe brands: included (rule decided 2026-11-28)
 Touch Cafe:       [Cafe Touch Cafe, Café Touch Cafe, Touch Cafe]
 Stories Coffee:   [Stories Coffee]
+
+# Found by labeling fresh answers (2026-11-28) - missed by v1
+Momos Coffee:     [Momos Coffee, Momos, 모모스커피, 모모스]
+Dessert 39:       [Dessert 39, Dessert39, 디저트39]
+The Liter:        [The Liter, 더리터]
+Now Coffee:       [Now Coffee, 나우커피]
+Coffee a-ya:      [Coffee a-ya, Coffee Aya, 커피아야]
+Cafe 24:          [카페24]   # not "Cafe 24" in English: it would match "cafe 24/7" and "cafe 24 hours"

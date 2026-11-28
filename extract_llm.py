@@ -36,7 +36,8 @@ PROMPT = """You extract coffee and cafe brands from AI-generated answers.
 Rules:
 - Include coffee chains and cafe chains, including dessert cafes (cake, donut, bingsu cafes)
   and unmanned/self-service cafe brands.
-- Exclude convenience stores (GS25, CU, 7-Eleven), study cafes, map apps, and generic terms.
+- Exclude independent single-shop cafes, convenience stores (GS25, CU, 7-Eleven), study cafes,
+  delivery and map apps, and generic terms.
 - Each brand once per answer. Use the brand's common English name.
 - sentiment:
     positive = recommended or praised, including a brand offered as an alternative
