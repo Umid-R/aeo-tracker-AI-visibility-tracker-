@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Visibility Tracker · Coffee chains in Korea</title>
+<meta name="description" content="How often AI models mention each Korean coffee chain in their answers, tracked daily.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf8f1; --card: #fffdf8; --ink: #1b1b1b; --muted: #6f6c64; --faint: #a6a298;
+    --grid: #ebe6da; --up: #1f7a45; --up-bg: #e3f3e8; --down: #c2343c; --down-bg: #fbe5e6;
+    --flat: #6f6c64; --flat-bg: #efece4; --accent: #1b1b1b;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 48px; }
+  .card { background: var(--card); border-radius: 18px; padding: 28px 32px 22px;
+          box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 12px 40px -24px rgba(60,50,20,.25);
+          background-image: radial-gradient(1200px 400px at 100% 0%, #fdf3d6 0%, transparent 60%),
+                            radial-gradient(800px 300px at 0% 100%, #e8f3ea 0%, transparent 55%); }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { background: var(--ink); color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .12em;
+          padding: 7px 14px; border-radius: 999px; text-transform: uppercase; }
+  .fig { color: var(--faint); font-weight: 700; font-size: 12px; letter-spacing: .14em; }
+  .tabs { display: inline-flex; background: #efebe1; border-radius: 999px; padding: 4px; margin-top: 20px; }
+  .tabs button { border: 0; background: transparent; font: inherit; font-weight: 600; font-size: 14px;
+                 padding: 8px 16px; border-radius: 999px; color: var(--muted); cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .controls { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+  .control { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 500; }
+  select { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); padding: 7px 30px 7px 12px;
+           border: 1px solid #ddd7c9; border-radius: 10px; background: #fff; cursor: pointer; }
+  .seg { display: inline-flex; border: 1px solid #ddd7c9; border-radius: 10px; overflow: hidden; background: #fff; }
+  .seg button { border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 600;
+                padding: 7px 12px; color: var(--muted); cursor: pointer; border-right: 1px solid #eee8db; }
+  .seg button:last-child { border-right: 0; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  h1 { font-size: clamp(28px, 4.4vw, 48px); line-height: 1.08; letter-spacing: -.02em; font-weight: 800;
+       margin: 22px 0 8px; }
+  h1 .mark { background: linear-gradient(transparent 58%, var(--mark, #ffe28a) 58%); padding: 0 2px; }
+  .sub { color: var(--muted); font-size: 15px; margin: 0 0 6px; }
+  .chart { width: 100%; margin-top: 8px; }
+  .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .note { margin-top: 8px; font-size: 13px; color: var(--muted); background: #f4f0e6; border-radius: 10px;
+          padding: 10px 12px; }
+  .foot { margin-top: 14px; font-size: 12px; color: var(--faint); line-height: 1.6; }
+  .foot b { color: var(--muted); font-weight: 600; }
+  .empty { padding: 60px 0; text-align: center; color: var(--muted); }
+  @media (max-width: 640px) { .card { padding: 20px 16px 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <span class="pill">AI visibility · Coffee chains in Korea</span>
+      <span class="fig" id="fig">FIGURE 1</span>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-model" aria-selected="true">By AI model</button>
+      <button role="tab" id="tab-brand" aria-selected="false">By coffee chain</button>
+    </div>
+
+    <div class="controls" id="controls-model">
+      <label class="control">AI model <select id="sel-model"></select></label>
+      <div class="control">Show top
+        <div class="seg" id="seg-top"></div>
+      </div>
+    </div>
+    <div class="controls" id="controls-brand" hidden>
+      <label class="control">Coffee chain <select id="sel-brand"></select></label>
+    </div>
+
+    <h1 id="headline"></h1>
+    <p class="sub" id="subtitle"></p>
+    <div class="chart" id="chart"></div>
+    <div class="note" id="note" hidden></div>
+
+    <div class="foot" id="foot"></div>
+  </div>
+</div>
+
+<script>
+const SVG = "http://www.w3.org/2000/svg";
+const TOP_OPTIONS = [3, 5, 8, 10, "All"];
+
+// Fixed colors so a brand keeps its color across views (identification only, no logos).
+const BRAND_COLORS = {
+  "Starbucks": "#0f7a4f", "Mega Coffee": "#e9b500", "Compose Coffee": "#2a2a2a",
+  "A Twosome Place": "#d22f3a", "Paik's Coffee": "#2b5fb8", "Ediya": "#22346f",
+  "Hollys": "#8d3047", "Paul Bassett": "#7a5a3a", "Tom N Toms": "#c46a1a",
+  "Pascucci": "#5a7d2a", "Fritz Coffee": "#3f8f9b", "Terarosa": "#9a4f2c",
+  "Mammoth Coffee": "#6b6b6b", "Blue Bottle": "#3b8fd6", "Coffee Bean": "#5b2d7a",
+  "Angel-in-us": "#b0477d", "The Venti": "#2f9d8f", "Banapresso": "#e1629a",
+};
+const MODEL_COLORS = { gemini: "#3a6fe0", gpt: "#10a37f", claude: "#d97757", deepseek: "#4d6bfe" };
+const FALLBACK = ["#7f77dd", "#1d9e75", "#d85a30", "#d4537e", "#378add", "#639922", "#ba7517", "#5f5e5a"];
+
+const state = { view: "model", model: null, top: 5, brand: null, data: null };
+
+const $ = (id) => document.getElementById(id);
+const el = (name, attrs = {}, parent) => {
+  const n = document.createElementNS(SVG, name);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+const text = (parent, str, attrs) => { const t = el("text", attrs, parent); t.textContent = str; return t; };
+
+function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function brandColor(b) { return BRAND_COLORS[b] || FALLBACK[hash(b) % FALLBACK.length]; }
+function modelColor(m) {
+  const key = Object.keys(MODEL_COLORS).find((k) => m.toLowerCase().includes(k));
+  return key ? MODEL_COLORS[key] : FALLBACK[hash(m) % FALLBACK.length];
+}
+// Light colors (yellow) need a darker shade for text.
+function textShade(hex) {
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  if (lum < 0.62) return hex;
+  const k = 0.7; return `rgb(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)})`;
+}
+function initials(name) {
+  const skip = new Set(["the", "a", "cafe", "coffee", "caffe"]);
+  const words = name.replace(/[^\p{L}\p{N}\s-]/gu, "").split(/[\s-]+/).filter(Boolean);
+  const main = words.filter((w) => !skip.has(w.toLowerCase()));
+  const use = main.length ? main : words;
+  return (use.length === 1 ? use[0].slice(0, 2) : use[0][0] + use[1][0]).toUpperCase();
+}
+function fmtDate(d) {
+  return new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+function fmtPeriod(p) { return p.from === p.to ? fmtDate(p.from) : `${fmtDate(p.from)}–${fmtDate(p.to)}`; }
+const pct = (v) => `${v.toFixed(1)}%`;
+
+// Spread labels vertically so they never overlap (keeps order, min gap between centers).
+function spread(items, gap, lo, hi) {
+  const s = [...items].sort((a, b) => a.y - b.y);
+  for (let i = 1; i < s.length; i++) s[i].y = Math.max(s[i].y, s[i - 1].y + gap);
+  const overflow = s.length ? s[s.length - 1].y - hi : 0;
+  if (overflow > 0) for (const it of s) it.y -= overflow;
+  for (let i = s.length - 2; i >= 0; i--) s[i].y = Math.min(s[i].y, s[i + 1].y - gap);
+  if (s.length && s[0].y < lo) { const d = lo - s[0].y; for (const it of s) it.y += d; }
+  return s;
+}
+
+function findCrossover(series) {
+  // Pairs where one passed the other between start and end; pick the biggest swing.
+  let best = null;
+  for (const a of series) for (const b of series) {
+    if (a === b) continue;
+    if (a.start < b.start && a.end > b.end) {
+      const swing = (a.end - b.end) + (b.start - a.start);
+      if (!best || swing > best.swing) best = { up: a, down: b, swing };
+    }
+  }
+  return best;
+}
+
+function uniqueBadges(series) {
+  const used = new Set();
+  for (const s of series) {
+    let b = s.badge;
+    if (used.has(b)) {
+      const letters = s.name.replace(/[^\p{L}]/gu, "").toUpperCase();
+      for (const c of letters.slice(1)) { if (!used.has(b[0] + c)) { b = b[0] + c; break; } }
+    }
+    used.add(b); s.badge = b;
+  }
+}
+
+function drawChart(series, periodStart, periodEnd, cross) {
+  uniqueBadges(series);
+  const box = $("chart"); box.innerHTML = "";
+  if (!series.length) { box.innerHTML = '<div class="empty">No data yet.</div>'; return; }
+
+  const W = 1000, labelGap = 76, top = 40, bottom = 70;
+  const H = Math.max(460, top + bottom + 30 + series.length * labelGap);
+  const x0 = 170, x1 = 600, lx = 690;
+  const vals = series.flatMap((s) => [s.start, s.end]);
+  let lo = Math.floor(Math.min(...vals) / 10) * 10, hi = Math.ceil(Math.max(...vals) / 10) * 10;
+  while (hi - lo < 20) { if (lo > 0) lo -= 10; if (hi - lo < 20 && hi < 100) hi += 10; if (lo <= 0 && hi >= 100) break; }
+  lo = Math.max(0, lo); hi = Math.min(100, hi);
+  const y = (v) => top + (hi - v) / (hi - lo) * (H - top - bottom);
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": "Slope chart of mention rate, start period versus latest period" }, box);
+  const defs = el("defs", {}, svg);
+  const glow = el("filter", { id: "glow", x: "-20%", y: "-50%", width: "140%", height: "200%" }, defs);
+  el("feGaussianBlur", { stdDeviation: 7 }, glow);
+
+  // grid
+  for (let v = lo; v <= hi; v += 10) {
+    el("line", { x1: x0 - 10, x2: x1 + 10, y1: y(v), y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+    text(svg, `${v}%`, { x: x0 - 95, y: y(v) + 4, "text-anchor": "end", "font-size": 13, fill: "var(--faint)", "font-weight": 500 });
+  }
+  // x labels
+  text(svg, fmtPeriod(periodStart), { x: x0, y: H - 22, "text-anchor": "middle", "font-size": 22, "font-weight": 800 });
+  text(svg, fmtPeriod(periodEnd), { x: x1, y: H - 22, "text-anchor": "middle", "font-size": 22, "font-weight": 800 });
+
+  // lines (glow + gradient line), lowest-ranked first so the leader is drawn on top
+  [...series].reverse().forEach((s, i) => {
+    const id = `g${i}`;
+    const lg = el("linearGradient", { id, x1: x0, x2: x1, y1: 0, y2: 0, gradientUnits: "userSpaceOnUse" }, defs);
+    el("stop", { offset: "0%", "stop-color": s.color, "stop-opacity": 0.35 }, lg);
+    el("stop", { offset: "100%", "stop-color": s.color, "stop-opacity": 1 }, lg);
+    el("line", { x1: x0, y1: y(s.start), x2: x1, y2: y(s.end), stroke: s.color, "stroke-width": 12,
+                 opacity: 0.22, filter: "url(#glow)", "stroke-linecap": "round" }, svg);
+    el("line", { x1: x0, y1: y(s.start), x2: x1, y2: y(s.end), stroke: `url(#${id})`, "stroke-width": 7,
+                 "stroke-linecap": "round" }, svg);
+  });
+
+  // crossover marker
+  if (cross) {
+    const a = cross.up, b = cross.down;
+    const t = (b.start - a.start) / ((a.end - a.start) - (b.end - b.start));
+    if (t > 0 && t < 1) {
+      const cx = x0 + t * (x1 - x0), cy = y(a.start + t * (a.end - a.start));
+      el("circle", { cx, cy, r: 22, fill: "none", stroke: "var(--ink)", "stroke-width": 1.5,
+                     "stroke-dasharray": "4 4", opacity: 0.7 }, svg);
+    }
+  }
+
+  // start labels (left), spread to avoid overlap
+  const seen = new Set();
+  const uniqStart = series.filter((s) => { const k = s.start.toFixed(1); if (seen.has(k)) return false; seen.add(k); return true; });
+  const startLabels = spread(uniqStart.map((s) => ({ s, y: y(s.start) })), 18, top - 10, H - bottom + 6);
+  for (const L of startLabels) {
+    text(svg, pct(L.s.start), { x: x0 - 20, y: L.y + 5, "text-anchor": "end", "font-size": 15,
+                                "font-weight": 600, fill: "#55524b" });
+  }
+  // dots
+  for (const s of series) {
+    el("circle", { cx: x0, cy: y(s.start), r: 8, fill: "#fff", stroke: s.color, "stroke-width": 4 }, svg);
+    el("circle", { cx: x1, cy: y(s.end), r: 8, fill: s.color, stroke: "#fff", "stroke-width": 2 }, svg);
+  }
+
+  // end labels (right): badge, name, big %, change pill
+  const endLabels = spread(series.map((s) => ({ s, y: y(s.end) })), labelGap, top + 6, H - bottom - 24);
+  for (const L of endLabels) {
+    const s = L.s, by = L.y;
+    el("path", { d: `M ${x1 + 10} ${y(s.end)} C ${x1 + 50} ${y(s.end)}, ${lx - 70} ${by}, ${lx - 34} ${by}`,
+                 fill: "none", stroke: s.color, "stroke-width": 2, "stroke-dasharray": "2 5",
+                 "stroke-linecap": "round" }, svg);
+    el("circle", { cx: lx, cy: by, r: 30, fill: "#fff", stroke: "#efeadf", "stroke-width": 2 }, svg);
+    el("circle", { cx: lx, cy: by, r: 24, fill: s.color }, svg);
+    text(svg, s.badge, { x: lx, y: by + 6, "text-anchor": "middle", "font-size": 16, "font-weight": 800,
+                         fill: "#fff", "letter-spacing": "0.02em" });
+    text(svg, s.name, { x: lx + 46, y: by - 9, "font-size": 18, "font-weight": 700 });
+    const big = text(svg, pct(s.end), { x: lx + 46, y: by + 24, "font-size": 30, "font-weight": 800,
+                                        fill: textShade(s.color) });
+    const ch = s.change ?? (s.end - s.start);
+    const [fg, bg, arrow] = ch > 0.05 ? ["var(--up)", "var(--up-bg)", "▲"]
+                          : ch < -0.05 ? ["var(--down)", "var(--down-bg)", "▼"]
+                          : ["var(--flat)", "var(--flat-bg)", "■"];
+    const label = `${arrow} ${ch > 0 ? "+" : ""}${ch.toFixed(1)} pts`;
+    const px = lx + 170, pw = 104;
+    el("rect", { x: px, y: by + 2, width: pw, height: 28, rx: 14, fill: bg }, svg);
+    text(svg, label, { x: px + pw / 2, y: by + 21, "text-anchor": "middle", "font-size": 13,
+                       "font-weight": 700, fill: fg });
+  }
+}
+
+function renderModelView() {
+  const m = state.data.models[state.model];
+  const all = m.brands.map((b) => ({ name: b.brand, start: b.start, end: b.end, change: b.change,
+                                     color: brandColor(b.brand), badge: initials(b.brand) }));
+  const series = state.top === "All" ? all : all.slice(0, state.top);
+  const cross = findCrossover(series);
+  const h = $("headline"); h.innerHTML = "";
+  const mark = (s) => { const sp = document.createElement("span"); sp.className = "mark";
+    sp.style.setProperty("--mark", s.color + "55"); sp.textContent = s.name; return sp; };
+  const colored = (s) => { const sp = document.createElement("span"); sp.style.color = textShade(s.color);
+    sp.textContent = s.name; return sp; };
+  if (cross) {
+    h.append(mark(cross.up), " just overtook ", colored(cross.down));
+  } else if (series.length) {
+    const lead = series[0];
+    h.append(mark(lead), ` leads ${m.label.split(" ")[0]}'s answers`);
+  }
+  $("subtitle").textContent =
+    `Share of ${m.label} answers that mention each coffee chain · ` +
+    `${m.questions_compared} questions compared · ${fmtPeriod(m.start)} vs ${fmtPeriod(m.end)}`;
+  drawChart(series, m.start, m.end, cross);
+  const note = $("note");
+  if (m.days < 2) { note.hidden = false; note.textContent = "Only one day of data so far: change appears from day 2."; }
+  else note.hidden = true;
+}
+
+function renderBrandView() {
+  const brand = state.brand;
+  const models = Object.entries(state.data.models);
+  const series = [];
+  let ref = null;
+  for (const [key, m] of models) {
+    const b = m.brands.find((x) => x.brand === brand);
+    if (!b) continue;
+    series.push({ name: m.label, start: b.start, end: b.end, change: b.change, color: modelColor(key), badge: m.label[0].toUpperCase() });
+    ref = ref || m;
+  }
+  series.sort((a, b) => b.end - a.end);
+  const h = $("headline"); h.innerHTML = "";
+  const sp = document.createElement("span"); sp.className = "mark";
+  sp.style.setProperty("--mark", brandColor(brand) + "55"); sp.textContent = brand;
+  if (series.length > 1) {
+    const best = series[0];
+    h.append(sp, ` is mentioned most by ${best.name}`);
+  } else if (series.length === 1) {
+    h.append("How AI talks about ", sp);
+  }
+  $("subtitle").textContent = ref
+    ? `Share of answers that mention ${brand}, per AI model · ${fmtPeriod(ref.start)} vs ${fmtPeriod(ref.end)}`
+    : "";
+  drawChart(series, ref ? ref.start : { from: "", to: "" }, ref ? ref.end : { from: "", to: "" }, null);
+  const note = $("note");
+  if (models.length < 2) {
+    note.hidden = false;
+    note.textContent = "Only one AI model is tracked so far. ChatGPT, Claude and DeepSeek will appear here as their data is collected.";
+  } else note.hidden = true;
+}
+
+function render() {
+  $("controls-model").hidden = state.view !== "model";
+  $("controls-brand").hidden = state.view !== "brand";
+  $("tab-model").setAttribute("aria-selected", state.view === "model");
+  $("tab-brand").setAttribute("aria-selected", state.view === "brand");
+  $("fig").textContent = state.view === "model" ? "FIGURE 1" : "FIGURE 2";
+  for (const b of $("seg-top").children) b.setAttribute("aria-pressed", String(b.dataset.v) === String(state.top));
+  state.view === "model" ? renderModelView() : renderBrandView();
+}
+
+function setup(data) {
+  state.data = data;
+  const models = Object.entries(data.models);
+  if (!models.length) { $("chart").innerHTML = '<div class="empty">No data yet.</div>'; return; }
+  for (const [key, m] of models) {
+    const o = document.createElement("option"); o.value = key; o.textContent = m.label; $("sel-model").appendChild(o);
+  }
+  state.model = models[0][0];
+  const brands = [...new Set(models.flatMap(([, m]) => m.brands.map((b) => b.brand)))];
+  const order = models[0][1].brands.map((b) => b.brand);
+  brands.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  for (const b of brands) {
+    const o = document.createElement("option"); o.value = b; o.textContent = b; $("sel-brand").appendChild(o);
+  }
+  state.brand = brands[0];
+  for (const v of TOP_OPTIONS) {
+    const b = document.createElement("button"); b.textContent = v; b.dataset.v = v;
+    b.onclick = () => { state.top = v; render(); }; $("seg-top").appendChild(b);
+  }
+  $("sel-model").onchange = (e) => { state.model = e.target.value; render(); };
+  $("sel-brand").onchange = (e) => { state.brand = e.target.value; render(); };
+  $("tab-model").onclick = () => { state.view = "model"; render(); };
+  $("tab-brand").onclick = () => { state.view = "brand"; render(); };
+
+  const updated = new Date(data.generated_at).toLocaleString("en-US",
+    { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" });
+  $("foot").innerHTML = "";
+  const f = $("foot");
+  f.append(Object.assign(document.createElement("b"), { textContent: "Source: " }),
+    "aeo-tracker. Each AI model is asked the same coffee questions (English + Korean) every day via its API; " +
+    "a brand counts as mentioned if it appears in the answer (matched against an approved brand list; " +
+    "100% precision, 95.6% recall on hand-labeled answers). API answers can differ from what app users see. ",
+    document.createElement("br"),
+    `Updated ${updated} KST · Colors identify brands; no affiliation.`);
+  render();
+}
+
+fetch("data/metrics.json", { cache: "no-store" })
+  .then((r) => r.json())
+  .then(setup)
+  .catch(() => { $("chart").innerHTML = '<div class="empty">Could not load data/metrics.json</div>'; });
+</script>
+</body>
+</html>

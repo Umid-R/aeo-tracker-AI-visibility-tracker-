@@ -2,10 +2,13 @@ name: Daily AEO run
 
 on:
   schedule:
-    # 09:17 UTC = 18:17 Korea time, after the Gemini free-tier quota resets.
+    # 09:23 UTC = 18:23 Korea time, after the Gemini free-tier quota resets (~17:00 KST).
     # (Off the hour on purpose: GitHub delays jobs scheduled at :00 the most.)
-    - cron: "17 23 * * *"
+    - cron: "23 9 * * *"
   workflow_dispatch: {}   # adds a "Run workflow" button for manual runs
+
+permissions:
+  contents: write   # lets the job commit the refreshed dashboard data
 
 jobs:
   run:
@@ -32,3 +35,15 @@ jobs:
       - name: Extract brands (v1)
         if: always()          # still extract whatever was collected, even if run.py failed
         run: python extract.py
+
+      - name: Export dashboard data
+        if: always()
+        run: python export_metrics.py
+
+      - name: Commit dashboard data
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dashboard/data/metrics.json
+          git diff --staged --quiet || (git commit -m "Update dashboard data" && git push)

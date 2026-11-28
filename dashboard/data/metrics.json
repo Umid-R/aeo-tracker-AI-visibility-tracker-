@@ -1,0 +1,194 @@
+{
+  "generated_at": "2026-11-28T10:52:29+00:00",
+  "metric": "mention_rate",
+  "extractor": "v1_string",
+  "category": "Coffee & cafe chains in Korea",
+  "models": {
+    "gemini-3.6-flash": {
+      "label": "Gemini 3.6 Flash",
+      "start": {
+        "from": "2026-11-27",
+        "to": "2026-11-27",
+        "answers": 7
+      },
+      "end": {
+        "from": "2026-11-28",
+        "to": "2026-11-28",
+        "answers": 7
+      },
+      "questions_compared": 7,
+      "total_answers": 21,
+      "days": 2,
+      "brands": [
+        {
+          "brand": "A Twosome Place",
+          "start": 71.4,
+          "end": 71.4,
+          "change": 0.0
+        },
+        {
+          "brand": "Paik's Coffee",
+          "start": 42.9,
+          "end": 57.1,
+          "change": 14.3
+        },
+        {
+          "brand": "Compose Coffee",
+          "start": 57.1,
+          "end": 42.9,
+          "change": -14.3
+        },
+        {
+          "brand": "Mega Coffee",
+          "start": 57.1,
+          "end": 42.9,
+          "change": -14.3
+        },
+        {
+          "brand": "Starbucks",
+          "start": 57.1,
+          "end": 42.9,
+          "change": -14.3
+        },
+        {
+          "brand": "Hollys",
+          "start": 28.6,
+          "end": 28.6,
+          "change": 0.0
+        },
+        {
+          "brand": "Pascucci",
+          "start": 28.6,
+          "end": 28.6,
+          "change": 0.0
+        },
+        {
+          "brand": "Tom N Toms",
+          "start": 28.6,
+          "end": 28.6,
+          "change": 0.0
+        },
+        {
+          "brand": "Paul Bassett",
+          "start": 14.3,
+          "end": 28.6,
+          "change": 14.3
+        },
+        {
+          "brand": "Ediya",
+          "start": 0.0,
+          "end": 28.6,
+          "change": 28.6
+        },
+        {
+          "brand": "Fritz Coffee",
+          "start": 28.6,
+          "end": 14.3,
+          "change": -14.3
+        },
+        {
+          "brand": "Terarosa",
+          "start": 28.6,
+          "end": 14.3,
+          "change": -14.3
+        },
+        {
+          "brand": "Banapresso",
+          "start": 14.3,
+          "end": 14.3,
+          "change": 0.0
+        },
+        {
+          "brand": "Billy Angel",
+          "start": 14.3,
+          "end": 14.3,
+          "change": 0.0
+        },
+        {
+          "brand": "Cafe Knotted",
+          "start": 14.3,
+          "end": 14.3,
+          "change": 0.0
+        },
+        {
+          "brand": "Cafe Layered",
+          "start": 14.3,
+          "end": 14.3,
+          "change": 0.0
+        },
+        {
+          "brand": "Mammoth Coffee",
+          "start": 14.3,
+          "end": 14.3,
+          "change": 0.0
+        },
+        {
+          "brand": "Touch Cafe",
+          "start": 14.3,
+          "end": 14.3,
+          "change": 0.0
+        },
+        {
+          "brand": "Anthracite",
+          "start": 0.0,
+          "end": 14.3,
+          "change": 14.3
+        },
+        {
+          "brand": "Cafe 24",
+          "start": 0.0,
+          "end": 14.3,
+          "change": 14.3
+        },
+        {
+          "brand": "Coffee a-ya",
+          "start": 0.0,
+          "end": 14.3,
+          "change": 14.3
+        },
+        {
+          "brand": "Dessert 39",
+          "start": 0.0,
+          "end": 14.3,
+          "change": 14.3
+        },
+        {
+          "brand": "Now Coffee",
+          "start": 0.0,
+          "end": 14.3,
+          "change": 14.3
+        },
+        {
+          "brand": "Angel-in-us",
+          "start": 14.3,
+          "end": 0.0,
+          "change": -14.3
+        },
+        {
+          "brand": "Blue Bottle",
+          "start": 14.3,
+          "end": 0.0,
+          "change": -14.3
+        },
+        {
+          "brand": "Stories Coffee",
+          "start": 14.3,
+          "end": 0.0,
+          "change": -14.3
+        },
+        {
+          "brand": "Sulbing",
+          "start": 14.3,
+          "end": 0.0,
+          "change": -14.3
+        },
+        {
+          "brand": "The Venti",
+          "start": 14.3,
+          "end": 0.0,
+          "change": -14.3
+        }
+      ]
+    }
+  }
+}
