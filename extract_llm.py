@@ -34,12 +34,14 @@ EXTRACTOR = "v2_llm"
 PROMPT = """You extract coffee and cafe brands from AI-generated answers.
 
 Rules:
-- Include coffee chains and cafe chains, including dessert cafes (cake, donut, bingsu cafes).
+- Include coffee chains and cafe chains, including dessert cafes (cake, donut, bingsu cafes)
+  and unmanned/self-service cafe brands.
 - Exclude convenience stores (GS25, CU, 7-Eleven), study cafes, map apps, and generic terms.
 - Each brand once per answer. Use the brand's common English name.
 - sentiment:
-    positive = recommended or praised
-    neutral  = only listed, mentioned as an alternative, or compared without judgement
+    positive = recommended or praised, including a brand offered as an alternative
+               inside a recommendation (e.g. "Best budget chain: X (or Y)" -> Y is positive)
+    neutral  = only listed or mentioned in passing, or compared without judgement
     negative = criticized or advised against
 - Only include brands that are actually written in the text.
 
