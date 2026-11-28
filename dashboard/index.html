@@ -100,7 +100,7 @@
 const SVG = "http://www.w3.org/2000/svg";
 const TOP_OPTIONS = [3, 5, 8, 10, "All"];
 
-// Fixed colors so a brand keeps its color across views (identification only, no logos).
+// Fixed colors so a brand keeps its color across views (identification only).
 const BRAND_COLORS = {
   "Starbucks": "#0f7a4f", "Mega Coffee": "#e9b500", "Compose Coffee": "#2a2a2a",
   "A Twosome Place": "#d22f3a", "Paik's Coffee": "#2b5fb8", "Ediya": "#22346f",
@@ -171,19 +171,6 @@ function spread(items, gap, lo, hi) {
   return s;
 }
 
-function findCrossover(series) {
-  // Pairs where one passed the other between start and end; pick the biggest swing.
-  let best = null;
-  for (const a of series) for (const b of series) {
-    if (a === b) continue;
-    if (a.start < b.start && a.end > b.end) {
-      const swing = (a.end - b.end) + (b.start - a.start);
-      if (!best || swing > best.swing) best = { up: a, down: b, swing };
-    }
-  }
-  return best;
-}
-
 function uniqueBadges(series) {
   const used = new Set();
   for (const s of series) {
@@ -196,7 +183,7 @@ function uniqueBadges(series) {
   }
 }
 
-function drawChart(series, periodStart, periodEnd, cross) {
+function drawChart(series, periodStart, periodEnd) {
   uniqueBadges(series);
   const box = $("chart"); box.innerHTML = "";
   if (!series.length) { box.innerHTML = '<div class="empty">No data yet.</div>'; return; }
@@ -236,17 +223,6 @@ function drawChart(series, periodStart, periodEnd, cross) {
     el("line", { x1: x0, y1: y(s.start), x2: x1, y2: y(s.end), stroke: `url(#${id})`, "stroke-width": 7,
                  "stroke-linecap": "round" }, svg);
   });
-
-  // crossover marker
-  if (cross) {
-    const a = cross.up, b = cross.down;
-    const t = (b.start - a.start) / ((a.end - a.start) - (b.end - b.start));
-    if (t > 0 && t < 1) {
-      const cx = x0 + t * (x1 - x0), cy = y(a.start + t * (a.end - a.start));
-      el("circle", { cx, cy, r: 22, fill: "none", stroke: "var(--ink)", "stroke-width": 1.5,
-                     "stroke-dasharray": "4 4", opacity: 0.7 }, svg);
-    }
-  }
 
   // start labels (left), spread to avoid overlap
   const seen = new Set();
@@ -298,22 +274,11 @@ function renderModelView() {
   const all = m.brands.map((b) => ({ name: b.brand, start: b.start, end: b.end, change: b.change,
                                      color: brandColor(b.brand), badge: initials(b.brand) }));
   const series = state.top === "All" ? all : all.slice(0, state.top);
-  const cross = findCrossover(series);
-  const h = $("headline"); h.innerHTML = "";
-  const mark = (s) => { const sp = document.createElement("span"); sp.className = "mark";
-    sp.style.setProperty("--mark", s.color + "55"); sp.textContent = s.name; return sp; };
-  const colored = (s) => { const sp = document.createElement("span"); sp.style.color = textShade(s.color);
-    sp.textContent = s.name; return sp; };
-  if (cross) {
-    h.append(mark(cross.up), " just overtook ", colored(cross.down));
-  } else if (series.length) {
-    const lead = series[0];
-    h.append(mark(lead), ` leads ${m.label.split(" ")[0]}'s answers`);
-  }
+  $("headline").textContent = `Coffee chains in ${m.label} answers`;
   $("subtitle").textContent =
     `Share of ${m.label} answers that mention each coffee chain · ` +
     `${m.questions_compared} questions compared · ${fmtPeriod(m.start)} vs ${fmtPeriod(m.end)}`;
-  drawChart(series, m.start, m.end, cross);
+  drawChart(series, m.start, m.end);
   const note = $("note");
   if (m.days < 2) { note.hidden = false; note.textContent = "Only one day of data so far: change appears from day 2."; }
   else note.hidden = true;
@@ -331,19 +296,11 @@ function renderBrandView() {
     ref = ref || m;
   }
   series.sort((a, b) => b.end - a.end);
-  const h = $("headline"); h.innerHTML = "";
-  const sp = document.createElement("span"); sp.className = "mark";
-  sp.style.setProperty("--mark", brandColor(brand) + "55"); sp.textContent = brand;
-  if (series.length > 1) {
-    const best = series[0];
-    h.append(sp, ` is mentioned most by ${best.name}`);
-  } else if (series.length === 1) {
-    h.append("How AI talks about ", sp);
-  }
+  $("headline").textContent = `${brand} across AI models`;
   $("subtitle").textContent = ref
     ? `Share of answers that mention ${brand}, per AI model · ${fmtPeriod(ref.start)} vs ${fmtPeriod(ref.end)}`
     : "";
-  drawChart(series, ref ? ref.start : { from: "", to: "" }, ref ? ref.end : { from: "", to: "" }, null);
+  drawChart(series, ref ? ref.start : { from: "", to: "" }, ref ? ref.end : { from: "", to: "" });
   const note = $("note");
   if (models.length < 2) {
     note.hidden = false;
